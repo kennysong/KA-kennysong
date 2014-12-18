@@ -1,0 +1,15 @@
+{
+  "name": "ka-project",
+  "description": "My project-based interview (JS) for Khan Academy's 2015 summer internship.",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kennysong/KA-kennysong.git"
+  },
+  "author": "Kenny Song",
+  "homepage": "https://github.com/kennysong/KA-kennysong",
+  "dependencies": {
+    "express": "^4.10.6",
+    "morgan": "^1.5.0",
+  }
+}
