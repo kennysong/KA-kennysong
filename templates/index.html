@@ -7,8 +7,14 @@
 
     <style type="text/css">
         body {
-            font-family: Lato;
+            font-family: Lato, sans-serif;
             background-image: url('/img/bg.png');
+        }
+
+        pre, textarea {
+            -webkit-box-sizing: border-box; 
+            -moz-box-sizing: border-box;    
+            box-sizing: border-box;
         }
 
         .container {
@@ -17,7 +23,7 @@
         }
 
         #code {
-            font-family: Inconsolata;
+            font-family: Inconsolata, monospace;
             font-size: 18px;
             width: 100%;
             height: 250px;
@@ -30,6 +36,15 @@
             outline: none;
             border-color: #AAA;
         }
+
+        #feedback {
+            width: 100%;
+            height: 250px;
+            border: 1px solid #AAA;
+            background-color: #EEE;
+            padding: 10px 15px;
+            overflow-y: scroll;
+        }
     </style>
     
 </head>
@@ -40,10 +55,18 @@
 
         <textarea id="code" placeholder="Code here..."></textarea>
 
-        <div class="feedback">
-            <p><strong>Feedback</strong></p>
-        </div>
+        <p><strong>Feedback</strong></p>
+        <pre id="feedback"></pre>
     </div>
 
+    <script src="/js/esprima.js"></script>
+    <script>
+        // Pipe textarea code into esprima
+        var codearea = document.getElementById('code');
+        codearea.onkeyup = function() {
+            var ast = esprima.parse(codearea.value);
+            document.getElementById('feedback').innerHTML = JSON.stringify(ast, null, 4);
+        };
+    </script>
 </body>
 </html>
