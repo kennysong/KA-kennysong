@@ -1,17 +1,15 @@
 /*** Wire textarea to Esprima ***/
 var ast;
-var codearea = document.getElementById('code');
-codearea.onkeyup = function () {
+document.getElementById('code').onkeyup = function () {
     try {
-        ast = esprima.parse(codearea.value); // May error
+        ast = esprima.parse(this.value); // May error
         run_tests();
-    } catch (e) {
-        console.log('Invalid code input: ', e);
-    }
+    } catch (err) {}
     print_tests();
 };
 
 /*** Wire tests to feedback console ***/
+// Messages for the feedback console
 var test_messages = {
     'forloop': 'Your code must have a for loop.',
     'noforloop': 'Your code cannot have a for loop.',
@@ -29,6 +27,7 @@ var test_messages = {
     'nestedwhileif': 'Your code must have an if statement inside a while loop.'
 };
 
+// Stores all the test names
 var test_ids = Object.keys(test_messages);
 
 // Print statuses of running tests to feedback console
