@@ -11,8 +11,4 @@ app.get('/', function(request, response) {
   response.sendFile(__dirname + '/templates/index.html');
 });
 
-app.get('/test', function(request, response) {
-  response.sendFile(__dirname + '/templates/test.html');
-});
-
 app.listen(process.env.PORT || 5000);
