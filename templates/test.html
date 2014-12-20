@@ -20,7 +20,7 @@
         <textarea id="code" placeholder="Write Javascript here..."></textarea>
 
         <p class="title">Feedback</p>
-        <div id="feedback">Select tests below</div>
+        <pre id="feedback">Select tests below</pre>
 
         <p class="title">Tests</p>
         <table id="tests">
@@ -68,6 +68,13 @@
 
     <script src="/js/esprima.js"></script>
     <script src="/js/estraverse.js"></script>
-    <script src="/js/ka.js"></script>
+    <script>
+        var codearea = document.getElementById('code');
+        var ast;
+        codearea.onkeyup = function () {
+            ast = esprima.parse(codearea.value);
+            document.getElementById('feedback').innerHTML = JSON.stringify(ast, null, 4);
+        };
+    </script>
 </body>
 </html>
