@@ -1,12 +1,19 @@
 /*** Wire textarea to Esprima ***/
 var ast;
-document.getElementById('code').onkeyup = function () {
+var cm_config = {
+    lineNumbers: true, 
+    autofocus: true, 
+    indentUnit: 4, 
+    mode: 'javascript',
+};
+var cm = CodeMirror.fromTextArea(document.getElementById('code'), cm_config);
+cm.on('change', function(cm) {
     try {
-        ast = esprima.parse(this.value); // May error
+        ast = esprima.parse(cm.getValue()); // May error
         run_tests();
     } catch (err) {}
     print_tests();
-};
+});
 
 /*** Wire tests to feedback console ***/
 // Messages for the feedback console
