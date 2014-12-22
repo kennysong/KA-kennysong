@@ -1,5 +1,4 @@
-/*** Wire textarea to Esprima ***/
-var ast;
+/** Initialize CodeMirror **/
 var cm_config = {
     lineNumbers: true, 
     autofocus: true, 
@@ -7,15 +6,41 @@ var cm_config = {
     mode: 'javascript',
 };
 var cm = CodeMirror.fromTextArea(document.getElementById('code'), cm_config);
-cm.on('change', function(cm) {
-    try {
-        ast = esprima.parse(cm.getValue()); // May error
-        run_tests();
-    } catch (err) {}
-    print_tests();
-});
 
-/*** Wire tests to feedback console ***/
+/** Link CodeMirror to Esprima (with web worker) **/
+var ast; 
+if (window.Worker) {
+    // Set up our web worker
+    var parser = new Worker('/js/esprima-worker.js');
+    parser.onmessage = function (event) {
+        if (event.data !== null) {
+            ast = event.data;
+            run_tests();
+            print_tests();
+        }        
+    };
+    // Link CodeMirror to worker
+    cm.on('change', function(cm) {
+        parser.postMessage(cm.getValue());
+    });
+} else {
+    // No web worker support; parse in browser 
+    cm.on('change', function(cm) {
+        try {
+            ast = esprima.parse(cm.getValue()); // May error
+            run_tests();
+            print_tests();
+        } catch (err) {}
+    });
+}
+
+/** Link tests to feedback console **/
+// Store all the test names
+var test_ids = ['forloop', 'noforloop', 'whileloop', 'nowhileloop', 'ifstatement', 
+                'noifstatement', 'vardeclaration', 'novardeclaration', 'nestedforfor', 
+                'nestedforwhile', 'nestedforif', 'nestedwhilefor', 'nestedwhilewhile', 
+                'nestedwhileif']
+
 // Messages for the feedback console
 var test_messages = {
     'forloop': 'Your code must have a for loop.',
@@ -33,12 +58,6 @@ var test_messages = {
     'nestedwhilewhile': 'Your code must have a while loop inside a while loop.',
     'nestedwhileif': 'Your code must have an if statement inside a while loop.'
 };
-
-// Stores all the test names
-var test_ids = ['forloop', 'noforloop', 'whileloop', 'nowhileloop', 'ifstatement', 
-                'noifstatement', 'vardeclaration', 'novardeclaration', 'nestedforfor', 
-                'nestedforwhile', 'nestedforif', 'nestedwhilefor', 'nestedwhilewhile', 
-                'nestedwhileif']
 
 // Print statuses of running tests to feedback console
 var print_tests = function () {
@@ -61,7 +80,18 @@ var print_tests = function () {
     document.getElementById('feedback').innerHTML = test_report;
 };
 
-/*** Test helpers ***/
+/** Test helpers **/
+// Assign onclick event to all checkboxes
+var inputs = document.getElementsByTagName('input');
+for (var i = 0; i < inputs.length; i++) {
+    var input = inputs[i];
+    input.onclick = function (event) { 
+        event = event || window.event;
+        var test_id = (event.target || event.srcElement).id;
+        toggle_test(test_id);
+    }
+}
+
 // Stores whether each test is on and passed
 var test_status = {
     'forloop': {'on': false, 'pass': false},
@@ -91,17 +121,6 @@ var test_opposites = {
     'vardeclaration': 'novardeclaration',
     'novardeclaration': 'vardeclaration'
 };
-
-// Assign onclick event to all checkboxes
-var inputs = document.getElementsByTagName('input');
-for (var i = 0; i < inputs.length; i++) {
-    var input = inputs[i];
-    input.onclick = function (event) { 
-        event = event || window.event;
-        var test_id = (event.target || event.srcElement).id;
-        toggle_test(test_id);
-    }
-}
 
 // Toggles tests appropriately (when checkbox is clicked)
 var toggle_test = function (test_id) {
@@ -141,7 +160,7 @@ var toggle_test = function (test_id) {
     print_tests();
 };
 
-/*** Tests ***/
+/** Tests **/
 // Runs all tests
 var run_tests = function() {
     for (var i = 0; i < test_ids.length; i++) {
@@ -160,7 +179,7 @@ var assert_forloop = function (ast) {
         enter: function(node){
             if (node.type == 'ForStatement') {
                 test_status['forloop']['pass'] = true;
-                estraverse.VisitorOption.Break();
+                return estraverse.VisitorOption.Break;
             }
         }
     });
@@ -174,7 +193,7 @@ var assert_noforloop = function (ast) {
         enter: function(node){
             if (node.type == 'ForStatement') {
                 test_status['noforloop']['pass'] = false;
-                estraverse.VisitorOption.Break();
+                return estraverse.VisitorOption.Break;
             }
         }
     });
@@ -188,7 +207,7 @@ var assert_whileloop = function (ast) {
         enter: function(node){
             if (node.type == 'WhileStatement') {
                 test_status['whileloop']['pass'] = true;
-                estraverse.VisitorOption.Break();
+                return estraverse.VisitorOption.Break;
             }
         }
     });
@@ -202,7 +221,7 @@ var assert_nowhileloop = function (ast) {
         enter: function(node){
             if (node.type == 'WhileStatement') {
                 test_status['nowhileloop']['pass'] = false;
-                estraverse.VisitorOption.Break();
+                return estraverse.VisitorOption.Break;
             }
         }
     });
@@ -216,7 +235,7 @@ var assert_ifstatement = function (ast) {
         enter: function(node){
             if (node.type == 'IfStatement') {
                 test_status['ifstatement']['pass'] = true;
-                estraverse.VisitorOption.Break();
+                return estraverse.VisitorOption.Break;
             }
         }
     });
@@ -230,7 +249,7 @@ var assert_noifstatement = function (ast) {
         enter: function(node){
             if (node.type == 'IfStatement') {
                 test_status['noifstatement']['pass'] = false;
-                estraverse.VisitorOption.Break();
+                return estraverse.VisitorOption.Break;
             }
         }
     });
@@ -244,7 +263,7 @@ var assert_vardeclaration = function (ast) {
         enter: function(node){
             if (node.type == 'VariableDeclaration') {
                 test_status['vardeclaration']['pass'] = true;
-                estraverse.VisitorOption.Break();
+                return estraverse.VisitorOption.Break;
             }
         }
     });
@@ -258,7 +277,7 @@ var assert_novardeclaration = function (ast) {
         enter: function(node){
             if (node.type == 'VariableDeclaration') {
                 test_status['novardeclaration']['pass'] = false;
-                estraverse.VisitorOption.Break();
+                return estraverse.VisitorOption.Break;
             }
         }
     });
@@ -275,7 +294,7 @@ var assert_nestedforfor = function (ast) {
                 for (var i = 0; i < nested_nodes.length; i++) {
                     if (nested_nodes[i].type == 'ForStatement') {
                         test_status['nestedforfor']['pass'] = true;
-                        estraverse.VisitorOption.Break();
+                        return estraverse.VisitorOption.Break;
                     }
                 }   
             }
@@ -294,7 +313,7 @@ var assert_nestedforwhile = function (ast) {
                 for (var i = 0; i < nested_nodes.length; i++) {
                     if (nested_nodes[i].type == 'WhileStatement') {
                         test_status['nestedforwhile']['pass'] = true;
-                        estraverse.VisitorOption.Break();
+                        return estraverse.VisitorOption.Break;
                     }
                 }   
             }
@@ -313,7 +332,7 @@ var assert_nestedforif = function (ast) {
                 for (var i = 0; i < nested_nodes.length; i++) {
                     if (nested_nodes[i].type == 'IfStatement') {
                         test_status['nestedforif']['pass'] = true;
-                        estraverse.VisitorOption.Break();
+                        return estraverse.VisitorOption.Break;
                     }
                 }   
             }
@@ -332,7 +351,7 @@ var assert_nestedwhilefor = function (ast) {
                 for (var i = 0; i < nested_nodes.length; i++) {
                     if (nested_nodes[i].type == 'ForStatement') {
                         test_status['nestedwhilefor']['pass'] = true;
-                        estraverse.VisitorOption.Break();
+                        return estraverse.VisitorOption.Break;
                     }
                 }   
             }
@@ -351,7 +370,7 @@ var assert_nestedwhilewhile = function (ast) {
                 for (var i = 0; i < nested_nodes.length; i++) {
                     if (nested_nodes[i].type == 'WhileStatement') {
                         test_status['nestedwhilewhile']['pass'] = true;
-                        estraverse.VisitorOption.Break();
+                        return estraverse.VisitorOption.Break;
                     }
                 }   
             }
@@ -370,7 +389,7 @@ var assert_nestedwhileif = function (ast) {
                 for (var i = 0; i < nested_nodes.length; i++) {
                     if (nested_nodes[i].type == 'IfStatement') {
                         test_status['nestedwhileif']['pass'] = true;
-                        estraverse.VisitorOption.Break();
+                        return estraverse.VisitorOption.Break;
                     }
                 }   
             }
