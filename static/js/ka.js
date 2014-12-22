@@ -11,6 +11,7 @@ var cm = CodeMirror.fromTextArea(document.getElementById('code'), cm_config);
 var ast; 
 if (window.Worker) {
     // Set up our web worker
+    console.log('Yay web workers!')
     var parser = new Worker('/js/esprima-worker.js');
     parser.onmessage = function (event) {
         if (event.data !== null) {
