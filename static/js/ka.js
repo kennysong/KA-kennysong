@@ -11,7 +11,6 @@ var cm = CodeMirror.fromTextArea(document.getElementById('code'), cm_config);
 var ast; 
 if (window.Worker) {
     // Set up our web worker
-    console.log('Yay web workers!')
     var parser = new Worker('/js/esprima-worker.js');
     parser.onmessage = function (event) {
         if (event.data !== null) {
@@ -26,7 +25,6 @@ if (window.Worker) {
     });
 } else {
     // No web worker support; parse in browser 
-    alert('No web workers :(')
     cm.on('change', function(cm) {
         try {
             ast = esprima.parse(cm.getValue()); // May error
@@ -41,7 +39,7 @@ if (window.Worker) {
 var test_ids = ['forloop', 'noforloop', 'whileloop', 'nowhileloop', 'ifstatement', 
                 'noifstatement', 'vardeclaration', 'novardeclaration', 'nestedforfor', 
                 'nestedforwhile', 'nestedforif', 'nestedwhilefor', 'nestedwhilewhile', 
-                'nestedwhileif']
+                'nestedwhileif'];
 
 // Messages for the feedback console
 var test_messages = {
@@ -91,7 +89,7 @@ for (var i = 0; i < inputs.length; i++) {
         event = event || window.event;
         var test_id = (event.target || event.srcElement).id;
         toggle_test(test_id);
-    }
+    };
 }
 
 // Stores whether each test is on and passed
@@ -166,12 +164,12 @@ var toggle_test = function (test_id) {
 // Runs all tests
 var run_tests = function() {
     for (var i = 0; i < test_ids.length; i++) {
-        test_id = test_ids[i];
+        var test_id = test_ids[i];
         if (test_status[test_id]['on']) {
             id_to_test[test_id](ast); // Execute appropriate test function
         }
     }
-}
+};
 
 // Test for for loop
 var assert_forloop = function (ast) {
@@ -185,7 +183,7 @@ var assert_forloop = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for no for loop
 var assert_noforloop = function (ast) {
@@ -199,7 +197,7 @@ var assert_noforloop = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for while loop
 var assert_whileloop = function (ast) {
@@ -213,7 +211,7 @@ var assert_whileloop = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for no while loop
 var assert_nowhileloop = function (ast) {
@@ -227,7 +225,7 @@ var assert_nowhileloop = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for if statement
 var assert_ifstatement = function (ast) {
@@ -241,7 +239,7 @@ var assert_ifstatement = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for no if statement 
 var assert_noifstatement = function (ast) {
@@ -255,7 +253,7 @@ var assert_noifstatement = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for variable declaration
 var assert_vardeclaration = function (ast) {
@@ -269,7 +267,7 @@ var assert_vardeclaration = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for no variable declaration
 var assert_novardeclaration = function (ast) {
@@ -283,7 +281,7 @@ var assert_novardeclaration = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for a for loop inside a for loop
 var assert_nestedforfor = function (ast) {
@@ -302,7 +300,7 @@ var assert_nestedforfor = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for a while loop inside a for loop
 var assert_nestedforwhile = function (ast) {
@@ -321,7 +319,7 @@ var assert_nestedforwhile = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for an if statement inside a for loop
 var assert_nestedforif = function (ast) {
@@ -340,7 +338,7 @@ var assert_nestedforif = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for a for loop inside a while loop
 var assert_nestedwhilefor = function (ast) {
@@ -359,7 +357,7 @@ var assert_nestedwhilefor = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for a while loop inside a while loop
 var assert_nestedwhilewhile = function (ast) {
@@ -378,7 +376,7 @@ var assert_nestedwhilewhile = function (ast) {
             }
         }
     });
-}
+};
 
 // Test for an if statement inside a while loop
 var assert_nestedwhileif = function (ast) {
@@ -397,7 +395,7 @@ var assert_nestedwhileif = function (ast) {
             }
         }
     });
-}
+};
 
 // Maps test_id to test function
 var id_to_test = {
