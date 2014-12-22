@@ -26,7 +26,7 @@ if (window.Worker) {
     });
 } else {
     // No web worker support; parse in browser 
-    console.log('No web workers :(')
+    alert('No web workers :(')
     cm.on('change', function(cm) {
         try {
             ast = esprima.parse(cm.getValue()); // May error
