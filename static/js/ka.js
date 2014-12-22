@@ -35,7 +35,10 @@ var test_messages = {
 };
 
 // Stores all the test names
-var test_ids = Object.keys(test_messages);
+var test_ids = ['forloop', 'noforloop', 'whileloop', 'nowhileloop', 'ifstatement', 
+                'noifstatement', 'vardeclaration', 'novardeclaration', 'nestedforfor', 
+                'nestedforwhile', 'nestedforif', 'nestedwhilefor', 'nestedwhilewhile', 
+                'nestedwhileif']
 
 // Print statuses of running tests to feedback console
 var print_tests = function () {
@@ -196,7 +199,6 @@ var assert_nowhileloop = function (ast) {
     estraverse.traverse(ast, {
         enter: function(node){
             if (node.type == 'WhileStatement') {
-                console.log(node)
                 test_status['nowhileloop']['pass'] = false;
                 estraverse.VisitorOption.Break();
             }
