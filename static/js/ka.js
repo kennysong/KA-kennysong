@@ -96,8 +96,10 @@ var test_opposites = {
 var inputs = document.getElementsByTagName('input');
 for (var i = 0; i < inputs.length; i++) {
     var input = inputs[i];
-    input.onclick = function (e) { 
-        toggle_test(e.target.id)
+    input.onclick = function (event) { 
+        event = event || window.event;
+        var test_id = (event.target || event.srcElement).id;
+        toggle_test(test_id);
     }
 }
 
